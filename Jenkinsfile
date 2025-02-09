@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         NETLIFY_SITE_ID = '572aa26a-966b-4b20-8661-882ef0e5c8a5'
-        NETLIFY_AUTH_TOKEN = credentials('netlify-token')
+      NETLIFY_AUTH_TOKEN = credentials('netlify-token')
     }
 
     stages {
@@ -69,14 +69,14 @@ pipeline {
 
                     post {
                         always {
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Local', reportTitles: '', useWrapperFileDirectly: true])
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Local E2E', reportTitles: '', useWrapperFileDirectly: true])
                         }
                     }
                 }
             }
         }
 
-         stage('Deploy staging') {
+        stage('Deploy staging') {
             agent {
                 docker {
                     image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
@@ -95,7 +95,7 @@ pipeline {
                     echo "Deploying to staging. Site ID: $NETLIFY_SITE_ID"
                     node_modules/.bin/netlify status
                     node_modules/.bin/netlify deploy --dir=build --json > deploy-output.json
-                    CI_ENVIRONMENT_URL =$(node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json)
+                    CI_ENVIRONMENT_URL=$(node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json)
                     npx playwright test  --reporter=html
                 '''
             }
@@ -108,9 +108,9 @@ pipeline {
         }
 
         stage('Approval') {
-                steps {
+            steps {
                    timeout(time: 15, unit: 'HOURS')  {
-                   input message: 'Do you wish to deploy to production?', ok: 'Yes, I am sure!'
+                    input message: 'Do you wish to deploy to production?', ok: 'Yes, I am sure!'
                 }
             }
         }
@@ -129,7 +129,7 @@ pipeline {
 
             steps {
                 sh '''
-                    node --version 
+                    node --version
                     npm install netlify-cli
                     node_modules/.bin/netlify --version
                     echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
